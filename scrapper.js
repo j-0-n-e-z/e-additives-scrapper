@@ -25,7 +25,7 @@ async function getAdditives(url) {
 	const allOrigins = {}
 	for (const originElement of originElements) {
 		const number = await originElement.evaluate(el => el.classList[1].slice(-2))
-		const origin = await originElement.evaluate(el => el.innerText)
+		const origin = await originElement.evaluate(el => el.innerText.toLowerCase())
 		allOrigins[number] = origin.trim()
 	}
 
@@ -47,7 +47,7 @@ async function getAdditives(url) {
 			node.innerText.split(' – ')
 		)
 
-		adds.push({ id: code, code, name, danger, origins })
+		adds.push({ id: code, code, name: name.toLowerCase(), danger, origins })
 	}
 	
 	console.log(adds)
