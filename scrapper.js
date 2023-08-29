@@ -16,7 +16,7 @@ async function getAdditives(url) {
 
 	await page
 		.waitForSelector('.pager__item', { timeout: 4000, hidden: true })
-		.catch(() => console.log('no addicon found'))
+		.catch((e) => console.log(e))
 
 	const addElements = await page.$$('.addicon')
 
