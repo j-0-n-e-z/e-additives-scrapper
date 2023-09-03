@@ -40,7 +40,7 @@ async function getAdditives(url: string) {
 		// console.log('@additive_links', additiveLinks)
 
 		const dangerReasons = await scrapDangerReasons(page, additiveLinks)
-		// console.log('@danger', dangerReasons);
+		console.log('@danger', dangerReasons)
 
 		const additives = additivesWithNoDangerReason.map((add, idx) => ({
 			...add,
@@ -135,25 +135,29 @@ async function scrapDangerReasons(page: Page, additiveLinks: string[]) {
 
 			if (dangerReason) {
 				const dangerReasonParagraphs = []
-				let next = await page.evaluateHandle(
-					el => el.nextElementSibling,
-					dangerReason
+
+				let next = await dangerReason.evaluateHandle(
+					el => el.nextElementSibling
 				)
 				if (next) {
-					let nextText = await page.evaluate(el => el?.textContent, next)
+					let nextText = await (next as ElementHandle<Element>).evaluate(
+						el => el?.textContent,
+						next
+					)
 					console.log(nextText)
-					while (
-						nextText &&
-						!nextText.startsWith('Использование') &&
-						!nextText.startsWith('Польза')
-					) {
+					while (nextText && !/^(Использование|Польза)/.test(nextText)) {
 						if (nextText) {
 							dangerReasonParagraphs.push(nextText)
 						}
-						next = await page.evaluateHandle(el => el?.nextElementSibling ?? null, next)
-						nextText = await page.evaluate(el => el?.textContent, next)
+						next = await (next as ElementHandle<Element>).evaluateHandle(
+							el => el?.nextElementSibling
+						)
+						nextText = await (next as ElementHandle<Element>).evaluate(
+							el => el.textContent
+						)
 					}
 				}
+
 				dangerReasons.push(dangerReasonParagraphs)
 			}
 		}
