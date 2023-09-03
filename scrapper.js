@@ -29,10 +29,11 @@ async function getAdditives(url) {
 		allOrigins[number] = origin.trim()
 	}
 
-	console.log(allOrigins)
+	console.log('origins', allOrigins)
 
-	const adds = []
-	const addElements = await page.$$('.addicon')
+	let adds = []
+	const moreDetailsLinks = []
+	let addElements = await page.$$('.addicon')
 
 	for (const addElement of addElements) {
 		const danger = await addElement.evaluate(el => +el.classList[1].at(-1))
@@ -46,14 +47,52 @@ async function getAdditives(url) {
 			origins.push(allOrigins[originNumber])
 		}
 
-		const [code, name] = await addElement.$eval('.addicon__link', node =>
-			node.innerText.split(' – ')
+		const [code, name, moreDetailsLink] = await addElement.$eval(
+			'.addicon__link',
+			node => [...node.innerText.split(' – '), node.getAttribute('href')]
 		)
 
-		adds.push({ id: code, code, name: name.toLowerCase(), danger, origins })
+		moreDetailsLinks.push(moreDetailsLink)
+		adds.push({
+			code,
+			name: name.toLowerCase(),
+			danger: { level: danger },
+			origins
+		})
 	}
 
-	console.log(adds)
+	const dangerReasons = []
+	for (const moreDetailsLink of moreDetailsLinks) {
+		// works only with these options and I have no idea why
+		await page.goto(moreDetailsLink, {
+			timeout: 0,
+			waitUntil: 'domcontentloaded'
+		})
+
+		const dangerReason = await page.$('h3.poor')
+		if (dangerReason) {
+			const dangerReasonParagraphs = []
+			let next = await dangerReason.evaluateHandle(el => el.nextElementSibling)
+			if (next) {
+				let nextText = await next.evaluate(el => el.textContent)
+				while (!nextText.startsWith('Использование') && !nextText.startsWith('Польза')) {
+					dangerReasonParagraphs.push(nextText)
+					next = await next.evaluateHandle(el => el.nextElementSibling)
+					nextText = await next.evaluate(el => el.textContent)
+				}
+			}
+			dangerReasons.push(dangerReasonParagraphs)
+		} else {
+			dangerReasons.push([])
+		}
+	}
+
+	adds = adds.map((add, i) => ({
+		...add,
+		danger: { ...add.danger, reasons: dangerReasons[i] }
+	}))
+
+	console.log('additives', adds)
 
 	if (adds.length) {
 		fs.writeFileSync('additives.json', JSON.stringify(adds), e =>
