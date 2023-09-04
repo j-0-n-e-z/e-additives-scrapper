@@ -4,8 +4,7 @@
 	"description": "",
 	"main": "scrapper.js",
 	"scripts": {
-		"start:dev": "nodemon src/scrapper.ts",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"dev": "nodemon src/scrapper.ts --ignore additives.json"
 	},
 	"keywords": [],
 	"author": "",
@@ -15,7 +14,14 @@
 	},
 	"devDependencies": {
 		"@types/puppeteer": "^7.0.4",
+		"eslint": "^8.48.0",
+		"eslint-config-airbnb": "^19.0.4",
+		"eslint-config-airbnb-typescript": "^17.1.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-plugin-prettier": "^5.0.0",
+		"eslint-plugin-sort-keys-fix": "^1.1.2",
 		"nodemon": "^3.0.1",
+		"prettier": "^3.0.3",
 		"ts-node": "^10.9.1",
 		"typescript": "^5.2.2"
 	}
