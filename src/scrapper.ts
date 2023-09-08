@@ -119,13 +119,20 @@ async function getAdditives(page: Page, url: string) {
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded' })
 
-    const loadMoreButton = await page.$('.pager__item')
-    if (loadMoreButton) {
-      loadMoreButton.click()
-      await page.waitForSelector('.pager__item', {
-        hidden: true,
-        timeout: 1500
-      })
+    const showAllAdditives = await page.$('.form-checkbox')
+
+    if (showAllAdditives) {
+      await showAllAdditives.click()
+      await page.waitForSelector('.ajax-progress', { hidden: true, timeout: 2000 })
+    } else {
+      throw new Error('Show all additives checkbox not found')
+    }
+
+    let loadMoreButton = await page.$('.pager__item')
+    while (loadMoreButton) {
+      await loadMoreButton.click()
+      await page.waitForSelector('.ajax-progress', { hidden: true, timeout: 2000 })
+      loadMoreButton = await page.$('.pager__item')
     }
 
     const origins = await scrapOrigins(page)
@@ -168,7 +175,7 @@ function saveAdditives(additives: Additive[]) {
 }
 
 async function main() {
-  const browser = await puppeteer.launch({ headless: 'new' })
+  const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
 
   const additives = await getAdditives(page, ADDITIVES_URL)
