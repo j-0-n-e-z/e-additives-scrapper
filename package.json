@@ -1,10 +1,10 @@
 {
-	"name": "e-additives-scrapper",
+	"name": "e-additives-scraper",
 	"version": "1.0.0",
 	"description": "",
-	"main": "scrapper.js",
+	"main": "scraper.js",
 	"scripts": {
-		"dev": "nodemon src/scrapper.ts --ignore additives.json"
+		"dev": "nodemon src/scraper.ts --ignore additives.json"
 	},
 	"keywords": [],
 	"author": "",
