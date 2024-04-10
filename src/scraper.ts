@@ -16,7 +16,8 @@ async function scrapOrigins(page: Page) {
 
     for (const originElement of originElements) {
       const key = await originElement.evaluate((el) => el.classList[1].slice(-2))
-      const fullOrigin = await originElement.evaluate((el) => el.textContent?.toLowerCase() ?? '') // ex: "растительное происхождение"
+      // ex: "растительное происхождение"
+      const fullOrigin = await originElement.evaluate((el) => el.textContent?.toLowerCase() ?? '')
 
       const [origin] = fullOrigin.trim().split(' ')
       if (isOrigin(origin)) {
@@ -56,7 +57,8 @@ async function scrapAdditives(
       }
 
       const [code, name, additiveLink] = await additiveElement.$eval('.addicon__link', (node) => {
-        const additiveTitle = node.textContent ?? '' // ex: "E621 – глутамат натрия"
+        // ex: "E621 – глутамат натрия"
+        const additiveTitle = node.textContent ?? ''
         return [...additiveTitle.split(' – '), node.getAttribute('href')]
       })
 
@@ -161,7 +163,7 @@ async function getAdditives(page: Page, url: string) {
 
 function saveAdditives(additives: Additive[]) {
   try {
-    if (additives?.length) {
+    if (additives.length) {
       fs.writeFile('additives.json', JSON.stringify(additives), (err) => {
         if (!err) console.log('File saved')
         else showError(err)
